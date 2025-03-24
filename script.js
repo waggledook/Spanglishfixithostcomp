@@ -621,7 +621,7 @@ function generateQRCode(url) {
       const p1Name = players.player1 ? players.player1.name : "Player 1";
       const p2Name = players.player2 ? players.player2.name : "Player 2";
 
-      // Determine the winner message
+      // Determine the winner message:
       let winnerMessage = "";
       if (player1Score > player2Score) {
         winnerMessage = `${p1Name} wins!`;
@@ -631,7 +631,7 @@ function generateQRCode(url) {
         winnerMessage = "It's a tie!";
       }
 
-      // Build the game over message
+      // Build the final scoreboard HTML:
       let endMessage = `
           <div class="game-over" style="font-size: 36px; color: #FFD700; text-shadow: 2px 2px 4px #000;">
               Game Over!
@@ -661,17 +661,31 @@ function generateQRCode(url) {
           </button>
       `;
 
-      // Hide auxiliary UI elements that are not needed in game over state
+      // Hide auxiliary UI elements:
       document.getElementById("instructionsText").style.display = "none";
       document.getElementById("feedback").textContent = "";
       document.getElementById("answer").style.display = "none";
       document.getElementById("points-bar").style.width = "0%";
       document.getElementById("counter").style.display = "none";
 
-      // Replace the sentence area with the game over message
-      document.getElementById("sentence").innerHTML = endMessage;
+      // If this client is the host, show the scoreboard in "host-status"
+      if (currentPlayerId === "host") {
+        const hostStatusDiv = document.getElementById("host-status");
+        if (hostStatusDiv) {
+          hostStatusDiv.innerHTML = endMessage;
+        }
+      } else {
+        // Otherwise, display in the normal "sentence" element
+        document.getElementById("sentence").innerHTML = endMessage;
+      }
 
-      // Show the download report button if present
+      // Attach the restart event listener:
+      const restartButton = document.getElementById("restart");
+      if (restartButton) {
+        restartButton.addEventListener("click", () => this.restartGame());
+      }
+
+      // Show download report button if present:
       const reportButton = document.getElementById("downloadReport");
       if (reportButton) {
         reportButton.style.display = "block";
@@ -680,15 +694,11 @@ function generateQRCode(url) {
           reportButton.dataset.listenerAdded = "true";
         }
       }
-
-      // Attach the restart event listener
-      document.getElementById("restart").addEventListener("click", () => this.restartGame());
     }).catch((error) => {
       console.error("Error retrieving game session data in endGame:", error);
     });
   }
 }
-
 
 restartGame() {
     this.gameActive = false;
