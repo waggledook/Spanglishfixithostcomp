@@ -610,18 +610,21 @@ function generateQRCode(url) {
   this.gameActive = false;
   if (this.pointsInterval) clearInterval(this.pointsInterval);
 
-  // Check if we're in multiplayer mode (i.e. currentSessionId is set)
   if (currentSessionId) {
     const sessionRef = firebase.database().ref('gameSessions/' + currentSessionId);
     sessionRef.once('value').then((snapshot) => {
-      const sessionData = snapshot.val();
-      // Retrieve player scores and custom names
-      const player1Score = sessionData.players.player1 ? sessionData.players.player1.score : 0;
-      const player2Score = sessionData.players.player2 ? sessionData.players.player2.score : 0;
-      const p1Name = sessionData.players.player1 ? sessionData.players.player1.name : "Player 1";
-      const p2Name = sessionData.players.player2 ? sessionData.players.player2.name : "Player 2";
+      // Retrieve the session data and log it for debugging
+      const sessionData = snapshot.val() || {};
+      console.log("endGame() sessionData:", sessionData);
 
-      // Determine the winner message using custom names
+      // Safely get players data, even if it might be missing
+      const players = sessionData.players || {};
+      const player1Score = players.player1 ? players.player1.score : 0;
+      const player2Score = players.player2 ? players.player2.score : 0;
+      const p1Name = players.player1 ? players.player1.name : "Player 1";
+      const p2Name = players.player2 ? players.player2.name : "Player 2";
+
+      // Determine the winner message
       let winnerMessage = "";
       if (player1Score > player2Score) {
         winnerMessage = `${p1Name} wins!`;
@@ -631,7 +634,7 @@ function generateQRCode(url) {
         winnerMessage = "It's a tie!";
       }
 
-      // Build a visually enhanced multiplayer game over screen using custom names
+      // Build the game over message
       let endMessage = `
           <div class="game-over" style="font-size: 36px; color: #FFD700; text-shadow: 2px 2px 4px #000;">
               Game Over!
@@ -681,11 +684,14 @@ function generateQRCode(url) {
         }
       }
 
-      // Attach restart event listener
+      // Attach the restart event listener
       document.getElementById("restart").addEventListener("click", () => this.restartGame());
+    }).catch((error) => {
+      console.error("Error retrieving game session data in endGame:", error);
     });
-  } 
+  }
 }
+
 
 restartGame() {
     this.gameActive = false;
