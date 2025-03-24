@@ -613,11 +613,8 @@ function generateQRCode(url) {
   if (currentSessionId) {
     const sessionRef = firebase.database().ref('gameSessions/' + currentSessionId);
     sessionRef.once('value').then((snapshot) => {
-      // Retrieve the session data and log it for debugging
       const sessionData = snapshot.val() || {};
       console.log("endGame() sessionData:", sessionData);
-
-      // Safely get players data, even if it might be missing
       const players = sessionData.players || {};
       const player1Score = players.player1 ? players.player1.score : 0;
       const player2Score = players.player2 ? players.player2.score : 0;
@@ -1295,6 +1292,11 @@ function joinGameSession(sessionId, userEnteredName) {
       console.log("Game session updated:", gameState);
       if (!gameState) return;
 
+        if (gameState.currentRound >= window.game.totalSentences) {
+    console.log("Game over condition met on player side.");
+    window.game.endGame();
+    return;
+  }
       // ----- Ensure both players are connected -----
       if (!gameState.players || Object.keys(gameState.players).length < 2) {
         document.getElementById("feedback").textContent = "Waiting for another player to join...";
@@ -1764,19 +1766,19 @@ function showHostIntermission(currentSentence, sessionData) {
   document.body.appendChild(intermissionDiv);
   
   // When the host clicks "Next Round", update Firebase.
-  document.getElementById("nextRoundBtn").addEventListener("click", () => {
+document.getElementById("nextRoundBtn").addEventListener("click", () => {
   const sessionRef = firebase.database().ref("gameSessions/" + currentSessionId);
 
   // If we’re already at the final round, end the game:
   if (sessionData.currentRound >= window.game.totalSentences - 1) {
-  // Move these two lines UP here so we always remove the overlay:
-  intermissionDiv.remove();
-  window.overlayDisplayed = false;
-  
-  // Mark currentRound so the host logic triggers endGame:
-  sessionRef.update({ currentRound: window.game.totalSentences });
-  return;
-}
+    // Move these two lines UP here so we always remove the overlay:
+    intermissionDiv.remove();
+    window.overlayDisplayed = false;
+    
+    // Mark currentRound so the host logic triggers endGame:
+    sessionRef.update({ currentRound: window.game.totalSentences });
+    return;
+  }
 
   // Otherwise, increment normally:
   const newRound = sessionData.currentRound + 1;
