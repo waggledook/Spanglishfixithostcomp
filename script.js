@@ -1759,19 +1759,29 @@ function showHostIntermission(currentSentence, sessionData) {
   
   // When the host clicks "Next Round", update Firebase.
   document.getElementById("nextRoundBtn").addEventListener("click", () => {
-    const sessionRef = firebase.database().ref('gameSessions/' + currentSessionId);
-    const newRound = sessionData.currentRound + 1;
-    sessionRef.update({
-      currentRound: newRound,
-      roundStartTime: Date.now(),
-      roundOver: false
-    });
-    // Reset answer flags for players.
-    sessionRef.child('players').child('player1').update({ hasAnswered: false });
-    sessionRef.child('players').child('player2').update({ hasAnswered: false });
-    intermissionDiv.remove();
-    window.overlayDisplayed = false;
+  const sessionRef = firebase.database().ref("gameSessions/" + currentSessionId);
+
+  // If we’re already at the final round, end the game:
+  if (sessionData.currentRound >= window.game.totalSentences - 1) {
+    // Mark currentRound so the host logic triggers the endGame path:
+    sessionRef.update({ currentRound: window.game.totalSentences });
+    return;
+  }
+
+  // Otherwise, increment normally:
+  const newRound = sessionData.currentRound + 1;
+  sessionRef.update({
+    currentRound: newRound,
+    roundStartTime: Date.now(),
+    roundOver: false
   });
+  
+  // Reset answer flags, remove overlay, etc.:
+  sessionRef.child("players").child("player1").update({ hasAnswered: false });
+  sessionRef.child("players").child("player2").update({ hasAnswered: false });
+  intermissionDiv.remove();
+  window.overlayDisplayed = false;
+});
 }
 
  function showPlayerIntermission(currentSentence, sessionData) {
