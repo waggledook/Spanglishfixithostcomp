@@ -610,6 +610,16 @@ function generateQRCode(url) {
   this.gameActive = false;
   if (this.pointsInterval) clearInterval(this.pointsInterval);
 
+  // Remove any leftover intermission overlays (for both host and players)
+  const playerOverlay = document.getElementById("intermission");
+  if (playerOverlay) {
+    playerOverlay.remove();
+  }
+  const hostOverlay = document.getElementById("host-intermission");
+  if (hostOverlay) {
+    hostOverlay.remove();
+  }
+
   if (currentSessionId) {
     const sessionRef = firebase.database().ref('gameSessions/' + currentSessionId);
     sessionRef.once('value').then((snapshot) => {
