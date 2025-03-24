@@ -294,8 +294,14 @@ if (hostBtn) {
       
       // Attach a realtime listener for the host view:
       joinGameSessionAsHost(sessionId, name);
-      const joinUrl = `${window.location.origin}?session=${sessionId}`;
-      generateQRCode(joinUrl);
+      let baseUrl;
+if (location.hostname === "localhost") {
+  baseUrl = `${window.location.origin}`;
+} else {
+  baseUrl = "https://waggledook.github.io/Spanglishfixithostcomp";
+}
+const joinUrl = `${baseUrl}?session=${sessionId}`;
+generateQRCode(joinUrl);
     });
   });
 }
