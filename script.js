@@ -1763,10 +1763,14 @@ function showHostIntermission(currentSentence, sessionData) {
 
   // If we’re already at the final round, end the game:
   if (sessionData.currentRound >= window.game.totalSentences - 1) {
-    // Mark currentRound so the host logic triggers the endGame path:
-    sessionRef.update({ currentRound: window.game.totalSentences });
-    return;
-  }
+  // Move these two lines UP here so we always remove the overlay:
+  intermissionDiv.remove();
+  window.overlayDisplayed = false;
+  
+  // Mark currentRound so the host logic triggers endGame:
+  sessionRef.update({ currentRound: window.game.totalSentences });
+  return;
+}
 
   // Otherwise, increment normally:
   const newRound = sessionData.currentRound + 1;
