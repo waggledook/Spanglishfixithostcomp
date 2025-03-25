@@ -211,6 +211,14 @@ class SpanglishFixitGame {
   padding: 20px;
   overflow-y: auto;  /* if the content inside host-status also overflows */
 }
+        #host-qr-code {
+      display: inline-block;
+      padding: 10px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.3);
+      margin-top: 10px;
+    }
     </style>
     <!-- Instructions Overlay -->
         <div id="instructions-overlay">
@@ -254,7 +262,6 @@ class SpanglishFixitGame {
   <br/><br/>
   <input type="text" id="sessionIdInput" placeholder="Enter Session ID" />
   <button id="joinMultiplayer">Join Multiplayer Game</button>
-  <div id="qr-code" style="margin-top: 20px;"></div> <!-- NEW QR CONTAINER -->
 </div>
     `;
 
@@ -312,13 +319,16 @@ if (location.hostname === "localhost") {
   baseUrl = "https://waggledook.github.io/Spanglishfixithostcomp";
 }
 const joinUrl = `${baseUrl}?session=${sessionId}`;
-generateQRCode(joinUrl);
+generateQRCode(joinUrl, "host-qr-code");
     });
   });
 }
 
-function generateQRCode(url) {
-  const qrContainer = document.getElementById("qr-code");
+function generateQRCode(url, elementId = "qr-code") {
+  // By default it uses "qr-code", but we can pass in "host-qr-code"
+  const qrContainer = document.getElementById(elementId);
+  if (!qrContainer) return;
+  
   qrContainer.innerHTML = ""; // Clear any previous QR
   new QRCode(qrContainer, {
     text: url,
@@ -329,7 +339,6 @@ function generateQRCode(url) {
     correctLevel: QRCode.CorrectLevel.H
   });
 }
-
 
     if (createBtn && joinBtn && sessionInput) {
   // For creating a game (player1)
@@ -1702,6 +1711,15 @@ if (gameState.players) {
     hostHtml += `<p style="font-size: 18px;">${p.name}: Score ${p.score} ${p.hasAnswered ? "(Answered)" : "(Waiting)"}</p>`;
   }
 }
+
+// NEW: Add a small heading + container for the QR code
+    hostHtml += `
+      <h3 style="margin-top: 20px; font-size: 24px;">Share This Game</h3>
+      <p style="margin-bottom: 10px;">Scan this QR code to join:</p>
+      <div id="host-qr-code" style="display: inline-block; padding: 10px; background: #fff; border-radius: 8px;">
+        <!-- We'll generate the QR code here -->
+      </div>
+    `;
 
 // Update the hostStatusDiv with the new HTML:
 hostStatusDiv.innerHTML = hostHtml;
