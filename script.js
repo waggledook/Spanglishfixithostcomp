@@ -1724,6 +1724,8 @@ if (gameState.players) {
 // Update the hostStatusDiv with the new HTML:
 hostStatusDiv.innerHTML = hostHtml;
     
+    generateQRCode(joinUrl, "host-qr-code");
+
     // **New Code:** If the game hasn't started yet (currentRound is -1),
     // and this client is the host, show the host's "Start Game" button.
     if (
