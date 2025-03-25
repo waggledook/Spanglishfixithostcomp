@@ -200,6 +200,11 @@ class SpanglishFixitGame {
             color: #FFD700;
             font-weight: bold;
         }
+        #host-status {
+    max-height: 80vh;   /* or 70vh, etc. */
+    overflow-y: auto;   /* enable vertical scrolling in the host box */
+    margin: 20px auto;  /* keep it centered and add top/bottom space */
+  }
     </style>
     <!-- Instructions Overlay -->
         <div id="instructions-overlay">
