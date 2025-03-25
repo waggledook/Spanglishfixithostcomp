@@ -1255,6 +1255,86 @@ const sentences = [
         sentence: "I'm watching a great serie at the moment.", 
         errorWord: "serie", 
         correctAnswer: "series"
+    },
+    {
+        sentence: "If you can’t tell me the true, just don’t say anything.",
+        errorWord: "true",
+        correctAnswer: "truth"
+    },
+    {
+        sentence: "Hannah’s always doing me such personal questions.",
+        errorWord: "doing",
+        correctAnswer: "asking"
+    },
+    {
+        sentence: "Do you know the website’s politics on returning items?",
+        errorWord: "politics",
+        correctAnswer: "policy"
+    },
+    {
+        sentence: "I’ve only watched 4 chapters so far, but I love the new season!",
+        errorWord: "chapters",
+        correctAnswer: "episodes"
+    },
+    {
+        sentence: "I’m too afraid to start inverting in the stock market.",
+        errorWord: "inverting",
+        correctAnswer: "investing"
+    },
+    {
+        sentence: "If you’re worried about committing mistakes, you won’t improve.",
+        errorWord: "committing",
+        correctAnswer: "making"
+    },
+    {
+        sentence: "He’s a military in the army.",
+        errorWord: "military",
+        correctAnswer: "soldier"
+    },
+    {
+        sentence: "She’s working in a car fabric, but she’s looking for another position.",
+        errorWord: "fabric",
+        correctAnswer: "factory"
+    },
+    {
+        sentence: "Tesla is starting to face a lot of competence from other car manufacturers.",
+        errorWord: "competence",
+        correctAnswer: "competition"
+    },
+    {
+        sentence: "Did you do it by your own, or did somebody help you?",
+        errorWord: "by",
+        correctAnswer: "on"
+    },
+    {
+        sentence: "I’ve read all of the collection less the third book.",
+        errorWord: "less",
+        correctAnswer: ["except", "but", "apart from", "except for"]
+    },
+    {
+        sentence: "Nick isn’t here right now. He stays at home.",
+        errorWord: "stays",
+        correctAnswer: "is"
+    },
+    {
+        sentence: "I passed a great weekend at the beach.",
+        errorWord: "passed",
+        correctAnswer: "had"
+    },
+    {
+        sentence: "She made a photo of me in front of the cathedral.",
+        errorWord: "made",
+        correctAnswer: "took"
+    },
+    {
+        sentence: "She works like a lawyer in New York.",
+        errorWord: "like",
+        correctAnswer: "as"
+    },
+    {
+        sentence: "As Samantha, I live in the countryside",
+        errorWord: "As",
+        correctAnswer: "like"
     }
 ];
 
