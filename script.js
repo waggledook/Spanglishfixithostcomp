@@ -1675,8 +1675,8 @@ function promptForPlayerName(callback) {
 }
 
 function joinGameSessionAsHost(sessionId, hostName) {
-  const sessionRef = firebase.database().ref('gameSessions/' + sessionId);
-  sessionRef.child('host').set({ name: hostName });
+  const sessionRef = firebase.database().ref("gameSessions/" + sessionId);
+  sessionRef.child("host").set({ name: hostName });
 
   // Hide single-player UI
   const gameContainer = document.getElementById("game-container");
@@ -1684,7 +1684,7 @@ function joinGameSessionAsHost(sessionId, hostName) {
     gameContainer.style.display = "none";
   }
 
-  // Create the host box if it doesn't already exist.
+  // Create the host box if it doesn't already exist
   let hostStatusDiv = document.getElementById("host-status");
   if (!hostStatusDiv) {
     hostStatusDiv = document.createElement("div");
@@ -1694,25 +1694,33 @@ function joinGameSessionAsHost(sessionId, hostName) {
     hostStatusDiv.style.borderRadius = "10px";
     hostStatusDiv.style.width = "90%";
     hostStatusDiv.style.maxWidth = "600px";
-    hostStatusDiv.style.margin = "20px auto"; // maintains the original position
+    hostStatusDiv.style.margin = "20px auto";
     hostStatusDiv.style.color = "#fff";
-    
-    // Insert static messaging and create two containers:
-    // - One for the QR code (which will remain static)
-    // - One for dynamic game info (which will update without overwriting the QR code)
+
+    // Reorder the HTML so the dynamic info (round, scores) appears above the QR code
     hostStatusDiv.innerHTML = `
       <h2>Host View</h2>
-      <p>Share this game by scanning the QR code below:</p>
-      <div id="host-qr-code" style="display: inline-block; padding: 10px; background: #fff; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.3); margin-top: 10px;"></div>
+      <!-- 1) Dynamic game info goes here -->
       <div id="host-dynamic-content"></div>
+      
+      <!-- 2) Then the "Share this game" text and the QR code below -->
+      <p>Share this game by scanning the QR code below:</p>
+      <div id="host-qr-code" style="
+        display: inline-block; 
+        padding: 10px; 
+        background: #fff; 
+        border-radius: 8px; 
+        box-shadow: 0 0 10px rgba(0,0,0,0.3); 
+        margin-top: 10px;
+      "></div>
     `;
-    
-    // Insert the host box in the same place as before.
+
+    // Insert the host box in its original position
     const multiDiv = document.getElementById("multiplayer-container");
     document.body.insertBefore(hostStatusDiv, multiDiv);
   }
 
-  // Define joinUrl (ensuring it's defined in this scope)
+  // Define joinUrl
   let baseUrl;
   if (location.hostname === "localhost") {
     baseUrl = window.location.origin;
@@ -1721,32 +1729,47 @@ function joinGameSessionAsHost(sessionId, hostName) {
   }
   const joinUrl = `${baseUrl}?session=${sessionId}`;
 
-  // Generate the QR code into the static container.
+  // Generate the QR code into the static container
   window.generateQRCode(joinUrl, "host-qr-code");
 
-  // Listen for Firebase updates and update dynamic content only.
-  sessionRef.on('value', (snapshot) => {
+  // Listen for Firebase updates and update only the dynamic area
+  sessionRef.on("value", (snapshot) => {
     const gameState = snapshot.val();
     if (!gameState) return;
 
-    let dynamicHtml = `<p style="font-size: 20px;">Current Round: ${gameState.currentRound === -1 ? "Not started" : (gameState.currentRound + 1)}</p>`;
+    // Build your round info, sentence, player scores, etc.
+    let dynamicHtml = `<p style="font-size: 20px;">Current Round: ${
+      gameState.currentRound === -1 ? "Not started" : gameState.currentRound + 1
+    }</p>`;
 
-    if (gameState.currentRound >= 0 && gameState.currentRound < gameState.sentences.length) {
+    if (
+      gameState.currentRound >= 0 &&
+      gameState.currentRound < gameState.sentences.length
+    ) {
       const currentSentence = gameState.sentences[gameState.currentRound];
-      dynamicHtml += `<div style="font-size: 26px; font-weight: bold; background: #fff; color: #000; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                        ${currentSentence.sentence}
-                      </div>`;
+      dynamicHtml += `<div style="
+        font-size: 26px; 
+        font-weight: bold; 
+        background: #fff; 
+        color: #000; 
+        padding: 10px; 
+        border-radius: 5px; 
+        margin: 10px 0;">
+          ${currentSentence.sentence}
+      </div>`;
     }
 
     if (gameState.players) {
       dynamicHtml += "<h3 style='font-size: 24px;'>Players</h3>";
       for (let playerKey in gameState.players) {
-        let p = gameState.players[playerKey];
-        dynamicHtml += `<p style="font-size: 18px;">${p.name}: Score ${p.score} ${p.hasAnswered ? "(Answered)" : "(Waiting)"}</p>`;
+        const p = gameState.players[playerKey];
+        dynamicHtml += `<p style="font-size: 18px;">
+          ${p.name}: Score ${p.score} ${p.hasAnswered ? "(Answered)" : "(Waiting)"}
+        </p>`;
       }
     }
 
-    // If game hasn't started and this client is host, add a Start Game button if needed.
+    // If the game hasn't started, show "Start Game" button (for the host)
     if (
       gameState.currentRound === -1 &&
       gameState.players &&
@@ -1755,24 +1778,32 @@ function joinGameSessionAsHost(sessionId, hostName) {
       !window.startButtonDisplayed
     ) {
       window.startButtonDisplayed = true;
-      dynamicHtml += `<button id="hostStartGame" style="padding: 10px 20px; font-size: 18px; margin-top: 10px; background: #28a745; color: white; border: none; border-radius: 5px;">
-                        Start Game
-                      </button>`;
+      dynamicHtml += `
+        <button id="hostStartGame" style="
+          padding: 10px 20px; 
+          font-size: 18px; 
+          margin-top: 10px; 
+          background: #28a745; 
+          color: white; 
+          border: none; 
+          border-radius: 5px;">
+            Start Game
+        </button>`;
     }
 
-    // Update only the dynamic content container.
+    // Update only the dynamic content container
     const dynamicContent = document.getElementById("host-dynamic-content");
     if (dynamicContent) {
       dynamicContent.innerHTML = dynamicHtml;
 
-      // Attach event listener for the start button if it exists.
+      // Attach event listener for the "Start Game" button if it exists
       const startButton = document.getElementById("hostStartGame");
       if (startButton) {
         startButton.addEventListener("click", () => {
           sessionRef.update({
             currentRound: 0,
             roundOver: false,
-            roundStartTime: Date.now()
+            roundStartTime: Date.now(),
           });
           startButton.remove();
           window.startButtonDisplayed = false;
@@ -1780,16 +1811,19 @@ function joinGameSessionAsHost(sessionId, hostName) {
       }
     }
 
-    // Handle game over or intermission logic as before.
+    // Check for game over or round intermission
     if (gameState.currentRound >= window.game.totalSentences) {
       window.game.endGame();
-    } else if (gameState.roundOver && currentPlayerId === "host" && !window.overlayDisplayed) {
+    } else if (
+      gameState.roundOver &&
+      currentPlayerId === "host" &&
+      !window.overlayDisplayed
+    ) {
       window.overlayDisplayed = true;
       showHostIntermission(gameState.sentences[gameState.currentRound], gameState);
     }
   });
 }
-
 
 function showHostIntermission(currentSentence, sessionData) {
   // Create a host-specific intermission overlay
