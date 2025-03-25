@@ -1660,70 +1660,67 @@ function promptForPlayerName(callback) {
 }
 
 function joinGameSessionAsHost(sessionId, hostName) {
+  // 1. Write the host’s name to Firebase
   const sessionRef = firebase.database().ref('gameSessions/' + sessionId);
   sessionRef.child('host').set({ name: hostName });
 
-  // Hide single-player UI
+  // 2. Define a base URL and the final joinUrl here
+  let baseUrl;
+  if (location.hostname === "localhost") {
+    baseUrl = window.location.origin;
+  } else {
+    baseUrl = "https://waggledook.github.io/Spanglishfixithostcomp";
+  }
+  const joinUrl = `${baseUrl}?session=${sessionId}`;
+
+  // 3. Hide single-player UI
   const gameContainer = document.getElementById("game-container");
   if (gameContainer) {
     gameContainer.style.display = "none";
   }
 
+  // 4. Create (or find) the #host-status box
   let hostStatusDiv = document.getElementById("host-status");
-if (!hostStatusDiv) {
-  hostStatusDiv = document.createElement("div");
-  hostStatusDiv.id = "host-status";
-  // Style it like the game box:
-  hostStatusDiv.style.background = "rgba(0, 0, 0, 0.8)";
-  hostStatusDiv.style.padding = "20px";
-  hostStatusDiv.style.borderRadius = "10px";
-  hostStatusDiv.style.width = "90%";
-  hostStatusDiv.style.maxWidth = "600px";
-  hostStatusDiv.style.margin = "20px auto"; // Centers it and gives top margin
-  hostStatusDiv.style.color = "#fff";
-  // Place it above the multiplayer buttons:
-  const multiDiv = document.getElementById("multiplayer-container");
-  document.body.insertBefore(hostStatusDiv, multiDiv);
-}
+  if (!hostStatusDiv) {
+    hostStatusDiv = document.createElement("div");
+    hostStatusDiv.id = "host-status";
+    // ... (your styling here)
+    document.body.appendChild(hostStatusDiv);
+  }
 
+  // 5. Listen to changes in the game session
   sessionRef.on('value', (snapshot) => {
     const gameState = snapshot.val();
     if (!gameState) return;
     console.log("Host view update:", gameState);
 
-    // Build minimal host view HTML:
-let hostHtml = `<h2 style="margin-top: 0; font-size: 32px;">Host View</h2>`;
-hostHtml += `<p style="font-size: 20px;">Current Round: ${gameState.currentRound === -1 ? "Not started" : (gameState.currentRound + 1)}</p>`;
-
-if (gameState.currentRound >= 0 && gameState.currentRound < gameState.sentences.length) {
-  const currentSentence = gameState.sentences[gameState.currentRound];
-  // Display the sentence in a bigger, highlighted box:
-  hostHtml += `<div style="font-size: 26px; font-weight: bold; background: #fff; color: #000; padding: 10px; border-radius: 5px; margin: 10px 0;">
-                  ${currentSentence.sentence}
-               </div>`;
-}
-
-// Also show the players’ names and scores:
-if (gameState.players) {
-  hostHtml += "<h3 style='font-size: 24px;'>Players</h3>";
-  for (let playerKey in gameState.players) {
-    let p = gameState.players[playerKey];
-    hostHtml += `<p style="font-size: 18px;">${p.name}: Score ${p.score} ${p.hasAnswered ? "(Answered)" : "(Waiting)"}</p>`;
-  }
-}
-
-// NEW: Add a small heading + container for the QR code
-    hostHtml += `
-      <h3 style="margin-top: 20px; font-size: 24px;">Share This Game</h3>
-      <p style="margin-bottom: 10px;">Scan this QR code to join:</p>
-      <div id="host-qr-code" style="display: inline-block; padding: 10px; background: #fff; border-radius: 8px;">
-        <!-- We'll generate the QR code here -->
-      </div>
+    // 6. Build the HTML for the host
+    let hostHtml = `
+      <h2>Host View</h2>
+      <p>Current Round: ${
+        gameState.currentRound === -1 ? "Not started" : (gameState.currentRound + 1)
+      }</p>
     `;
 
-// Update the hostStatusDiv with the new HTML:
-hostStatusDiv.innerHTML = hostHtml;
-    
+    // Show players
+    if (gameState.players) {
+      hostHtml += `<h3>Players</h3>`;
+      for (let playerKey in gameState.players) {
+        const p = gameState.players[playerKey];
+        hostHtml += `<p>${p.name}: Score ${p.score} (${p.hasAnswered ? "Answered" : "Waiting"})</p>`;
+      }
+    }
+
+    // Show a placeholder for the QR code
+    hostHtml += `
+      <h3>Share This Game</h3>
+      <p>Scan this QR code to join:</p>
+      <div id="host-qr-code" style="display:inline-block; background:#fff;"></div>
+    `;
+
+    hostStatusDiv.innerHTML = hostHtml;
+
+    // 7. Re-generate the QR code every time the host UI updates
     generateQRCode(joinUrl, "host-qr-code");
 
     // **New Code:** If the game hasn't started yet (currentRound is -1),
