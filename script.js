@@ -73,17 +73,18 @@ class SpanglishFixitGame {
     <style>
         /* General body styles */
         body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #2E3192, #1BFFFF);
-            color: white;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-        }
+  font-family: 'Poppins', sans-serif;
+  background: linear-gradient(135deg, #2E3192, #1BFFFF);
+  color: white;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* top-align the content */
+  min-height: 100vh;          /* let the page grow taller than 1 screen */
+  margin: 0;
+  overflow-y: auto;           /* scroll if content is bigger than the screen */
+}
         /* Instructions overlay */
         #instructions-overlay {
             position: fixed;
@@ -201,10 +202,14 @@ class SpanglishFixitGame {
             font-weight: bold;
         }
         #host-status {
-  min-height: 80vh;   /* ensures the host box is at least 80% of the viewport height */
-  max-height: 90vh;   /* optionally limit the height so it doesn’t grow too large */
-  overflow-y: auto;   /* allows scrolling if content exceeds the max height */
+  width: 90%;
+  max-width: 600px;
+  min-height: 80vh; /* or whatever size you want */
   margin: 20px auto;
+  background: rgba(0,0,0,0.8);
+  border-radius: 10px;
+  padding: 20px;
+  overflow-y: auto;  /* if the content inside host-status also overflows */
 }
     </style>
     <!-- Instructions Overlay -->
