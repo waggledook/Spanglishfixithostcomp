@@ -299,10 +299,14 @@ class SpanglishFixitGame {
       <div id="host-container">
   <img id="titleImage" src="images/Spanglish-title.png" alt="Spanglish Fixit" style="display: block; max-width: 300px; margin: 0 auto;">
   <!-- Dedicated wrapper for the QR code -->
-  <div id="host-qr-wrapper" style="display: flex; justify-content: center; margin-top: 10px;">
-    <div id="host-qr-code" style="padding: 10px; background: #fff; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);">
-      <!-- QR code will be generated here -->
-    </div>
+  <div id="host-qr-wrapper" style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 10px;">
+  <div id="host-qr-code" style="padding: 10px; background: #fff; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);">
+    <!-- QR code will be generated here -->
+  </div>
+  <button id="copyLinkButton" style="padding: 8px 12px; font-size: 14px; border:none; border-radius:5px; cursor:pointer;">
+    Copy link
+  </button>
+</div>
   </div>
   <button id="hostGameButton" style="display: block; margin: 20px auto 0 auto;">Host Game</button>
 </div>
@@ -446,6 +450,17 @@ if (sessionParam) {
           hostContainer.appendChild(qrContainer);
         }
         generateQRCode(joinUrl, "host-qr-code");
+        // then wire up our copy button:
+const copyBtn = document.getElementById("copyLinkButton");
+copyBtn.addEventListener("click", () => {
+  navigator.clipboard.writeText(joinUrl)
+    .then(() => {
+      // simple feedback
+      copyBtn.textContent = "Copied!";
+      setTimeout(() => copyBtn.textContent = "Copy link", 1500);
+    })
+    .catch(() => alert("Failed to copy. Try again."));
+});
 
         // Attach the realtime listener for the host view.
         joinGameSessionAsHost(sessionId, name);
@@ -1824,17 +1839,6 @@ function joinGameSessionAsHost(sessionId, hostName) {
       <h2>Host View</h2>
       <!-- 1) Dynamic game info goes here -->
       <div id="host-dynamic-content"></div>
-      
-      <!-- 2) Then the "Share this game" text and the QR code below -->
-      <p>Share this game by scanning the QR code below:</p>
-      <div id="host-qr-code" style="
-        display: inline-block; 
-        padding: 10px; 
-        background: #fff; 
-        border-radius: 8px; 
-        box-shadow: 0 0 10px rgba(0,0,0,0.3); 
-        margin-top: 10px;
-      "></div>
     `;
 
     // Insert the host box in its original position
