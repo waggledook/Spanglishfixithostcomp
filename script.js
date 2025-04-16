@@ -455,55 +455,54 @@ if (sessionParam) {
     }
 
     updateSentence() {
-  // Re-enable answer input for the new round.
-  document.getElementById("answer").disabled = false;
-
-  if (this.reviewMode) {
-    // In review mode, use the length of wrongAnswers
-    if (this.currentIndex >= this.wrongAnswers.length) {
-      document.getElementById("sentence").innerHTML = "Review complete!";
-      document.getElementById("answer").style.display = "none";
-      document.getElementById("feedback").textContent = "";
-      this.reviewMode = false;
-      return;
+      // Reset error word selection for the new sentence.
+      this.currentErrorWord = null;
+      document.getElementById("answer").disabled = false;
+    
+      if (this.reviewMode) {
+        if (this.currentIndex >= this.wrongAnswers.length) {
+          document.getElementById("sentence").innerHTML = "Review complete!";
+          document.getElementById("answer").style.display = "none";
+          document.getElementById("feedback").textContent = "";
+          this.reviewMode = false;
+          return;
+        }
+        document.getElementById("counter").textContent = `Review: ${this.currentIndex + 1}/${this.wrongAnswers.length}`;
+      } else {
+        if (this.currentIndex >= this.totalSentences) {
+          this.endGame();
+          return;
+        }
+        document.getElementById("counter").textContent = `Sentence: ${this.currentIndex + 1}/${this.totalSentences}`;
+      }
+    
+      const currentSet = this.reviewMode ? this.wrongAnswers : this.sentences;
+      const currentSentence = currentSet[this.currentIndex];
+      const sentenceParts = currentSentence.sentence.split(" ");
+      let sentenceHTML = sentenceParts.map((word) => `<span class="clickable-word">${word}</span>`).join(" ");
+      document.getElementById("sentence").innerHTML = sentenceHTML;
+    
+      // Re-enable clicking for the new sentence.
+      document.getElementById("sentence").style.pointerEvents = "auto";
+    
+      // Start the 30-second phase timer for scoring (max 100 points, min 10)
+      this.startClickTime = Date.now();
+      if (this.pointsInterval) clearInterval(this.pointsInterval);
+      this.pointsInterval = setInterval(() => {
+        let elapsed = Date.now() - this.startClickTime;
+        let availablePoints = Math.max(100 - Math.floor(elapsed / 300), 10);
+        let percentage = ((availablePoints - 10) / (100 - 10)) * 100;
+        document.getElementById("points-bar").style.width = percentage + "%";
+      }, 100);
+    
+      // Attach click listeners to each word.
+      const clickableWords = document.querySelectorAll(".clickable-word");
+      clickableWords.forEach((wordElement) => {
+        wordElement.addEventListener("click", () => {
+          this.handleWordClick(wordElement, currentSentence);
+        });
+      });
     }
-    document.getElementById("counter").textContent = `Review: ${this.currentIndex + 1}/${this.wrongAnswers.length}`;
-  } else {
-    // Normal game mode: check against totalSentences
-    if (this.currentIndex >= this.totalSentences) {
-      this.endGame();
-      return;
-    }
-    document.getElementById("counter").textContent = `Sentence: ${this.currentIndex + 1}/${this.totalSentences}`;
-  }
-
-  const currentSet = this.reviewMode ? this.wrongAnswers : this.sentences;
-  const currentSentence = currentSet[this.currentIndex];
-  const sentenceParts = currentSentence.sentence.split(" ");
-  let sentenceHTML = sentenceParts.map((word) => `<span class="clickable-word">${word}</span>`).join(" ");
-  document.getElementById("sentence").innerHTML = sentenceHTML;
-
-  // Re-enable clicking for new sentence
-  document.getElementById("sentence").style.pointerEvents = "auto";
-
-  // Start the 30-second phase timer for scoring (max 100 points, min 10)
-  this.startClickTime = Date.now();
-  if (this.pointsInterval) clearInterval(this.pointsInterval);
-  this.pointsInterval = setInterval(() => {
-    let elapsed = Date.now() - this.startClickTime;
-    let availablePoints = Math.max(100 - Math.floor(elapsed / 300), 10);
-    let percentage = ((availablePoints - 10) / (100 - 10)) * 100;
-    document.getElementById("points-bar").style.width = percentage + "%";
-  }, 100);
-
-  // Attach click listeners to each word
-  const clickableWords = document.querySelectorAll(".clickable-word");
-  clickableWords.forEach((wordElement) => {
-    wordElement.addEventListener("click", () => {
-      this.handleWordClick(wordElement, currentSentence);
-    });
-  });
-}
 
     handleWordClick(wordElement, currentSentence) {
     if (this.pointsInterval) {
