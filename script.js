@@ -84,99 +84,224 @@ class SpanglishFixitGame {
     initUI() {
         console.log("Game script is running!");
         document.title = "Spanglish Fixit Challenge";
-        document.body.innerHTML = `
-  <style>
-    /* General body styles */
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #2E3192, #1BFFFF);
-      color: white;
-      text-align: center;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      margin: 0;
-    }
-    /* Instructions overlay (same as before) */
-    #instructions-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
-    }
-    #instructions-box {
-      background: #333;
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 500px;
-      text-align: left;
-    }
-    #close-instructions {
-      margin-top: 15px;
-      padding: 5px 10px;
-      background: #28a745;
-      border: none;
-      border-radius: 5px;
-      color: white;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    #close-instructions:hover {
-      opacity: 0.8;
-    }
-    /* Minimal Host Container */
-    #host-container {
-      margin-top: 20px;
-      background: rgba(0, 0, 0, 0.8);
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-      text-align: center;
-    }
-    #hostGameButton {
-      padding: 10px 20px;
-      font-size: 18px;
-      background: #28a745;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    #hostGameButton:hover {
-      opacity: 0.8;
-    }
-  </style>
-  <!-- Instructions Overlay -->
-  <div id="instructions-overlay">
-    <div id="instructions-box">
-      <h2>How to Play</h2>
-      <p>Welcome to the Spanglish Fixit Challenge! Here's what to do:</p>
-      <ul>
-        <li>Click the incorrect word in each sentence.</li>
-        <li>After clicking, type the correct word.</li>
-        <li>Your points decrease from 100 to 10 over 30 seconds for each sentence.</li>
-        <li>Incorrect clicks lose you 50 points.</li>
-        <li>The game ends after 15 sentences.</li>
-      </ul>
-      <p>Good luck!</p>
-      <button id="close-instructions">Got It!</button>
-    </div>
-  </div>
-  <!-- Host Container -->
-  <div id="host-container">
-    <h1>Spanglish Fixit Host</h1>
-    <button id="hostGameButton">Host Game</button>
-  </div>
-`;
+       // Check for the session parameter in the URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const sessionParam = urlParams.get("session");
+
+  if (sessionParam) {
+    // Player joining mode (full UI)
+    document.body.innerHTML = `
+      <style>
+        /* Full Game UI Styles */
+        body {
+          font-family: 'Poppins', sans-serif;
+          background: linear-gradient(135deg, #2E3192, #1BFFFF);
+          color: white;
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: flex-start;
+          min-height: 100vh;
+          margin: 0;
+          overflow-y: auto;
+        }
+        /* Instructions overlay */
+        #instructions-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.8);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+        }
+        #instructions-box {
+          background: #333;
+          padding: 20px;
+          border-radius: 10px;
+          max-width: 500px;
+          text-align: left;
+        }
+        #close-instructions {
+          margin-top: 15px;
+          padding: 5px 10px;
+          background: #28a745;
+          border: none;
+          border-radius: 5px;
+          color: white;
+          cursor: pointer;
+          transition: 0.3s;
+        }
+        #close-instructions:hover {
+          opacity: 0.8;
+        }
+        /* Game container styles */
+        #game-container {
+          background: rgba(0, 0, 0, 0.8);
+          padding: 20px;
+          border-radius: 10px;
+          box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+          text-align: center;
+          width: 90%;
+          max-width: 600px;
+          margin-top: 20px;
+        }
+        /* Input and button styles */
+        input, button {
+          padding: 10px;
+          font-size: 16px;
+          border-radius: 5px;
+          border: none;
+          margin: 10px auto;
+          display: block;
+        }
+        button {
+          cursor: pointer;
+          transition: 0.3s;
+        }
+        button:hover {
+          opacity: 0.8;
+        }
+      </style>
+      <!-- Instructions Overlay -->
+      <div id="instructions-overlay">
+        <div id="instructions-box">
+          <h2>How to Play</h2>
+          <p>Welcome to the Spanglish Fixit Challenge! Here's what to do:</p>
+          <ul>
+            <li>Click the incorrect word in each sentence.</li>
+            <li>After clicking, type the correct word.</li>
+            <li>Your points decrease from 100 to 10 over 30 seconds for each sentence.</li>
+            <li>Incorrect clicks lose you 50 points.</li>
+            <li>The game ends after 15 sentences.</li>
+          </ul>
+          <p>Good luck!</p>
+          <button id="close-instructions">Got It!</button>
+        </div>
+      </div>
+      <!-- Full Game Container -->
+      <div id="game-container">
+        <h1>Spanglish Fixit Challenge</h1>
+        <p id="counter">Sentence: 0/15</p>
+        <div id="points-bar-container" style="width:100%; background: #555; height: 10px;">
+          <div id="points-bar" style="width: 100%; height: 100%; background: #0f0; transition: width 0.1s linear;"></div>
+        </div>
+        <p id="sentence"></p>
+        <p id="instructionsText">Click the error and type the correction:</p>
+        <input type="text" id="answer" autofocus>
+        <p id="feedback"></p>
+        <p>Score: <span id="score">0</span></p>
+        <p>Best Score: <span id="bestScore">0</span></p>
+        <button id="restart" style="display: none;">Restart</button>
+        <button id="review" style="display: none;">Review Mistakes</button>
+      </div>
+      <!-- Multiplayer Section (if needed) -->
+      <div id="multiplayer-container" style="margin-top: 20px;">
+        <!-- Existing multiplayer UI elements can go here -->
+      </div>
+    `;
+  } else {
+    // Host mode (minimal UI)
+    document.body.innerHTML = `
+      <style>
+        /* Minimal Host UI Styles */
+        body {
+          font-family: 'Poppins', sans-serif;
+          background: linear-gradient(135deg, #2E3192, #1BFFFF);
+          color: white;
+          text-align: center;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          min-height: 100vh;
+          margin: 0;
+        }
+        /* Instructions overlay */
+        #instructions-overlay {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0, 0, 0, 0.8);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+        }
+        #instructions-box {
+          background: #333;
+          padding: 20px;
+          border-radius: 10px;
+          max-width: 500px;
+          text-align: left;
+        }
+        #close-instructions {
+          margin-top: 15px;
+          padding: 5px 10px;
+          background: #28a745;
+          border: none;
+          border-radius: 5px;
+          color: white;
+          cursor: pointer;
+          transition: 0.3s;
+        }
+        #close-instructions:hover {
+          opacity: 0.8;
+        }
+        /* Minimal Host Container */
+        #host-container {
+          margin-top: 20px;
+          background: rgba(0, 0, 0, 0.8);
+          padding: 20px;
+          border-radius: 10px;
+          box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+          text-align: center;
+          width: 90%;
+          max-width: 600px;
+        }
+        #hostGameButton {
+          padding: 10px 20px;
+          font-size: 18px;
+          background: #28a745;
+          color: white;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: 0.3s;
+        }
+        #hostGameButton:hover {
+          opacity: 0.8;
+        }
+      </style>
+      <!-- Instructions Overlay -->
+      <div id="instructions-overlay">
+        <div id="instructions-box">
+          <h2>How to Play</h2>
+          <p>Welcome to the Spanglish Fixit Challenge! Here's what to do:</p>
+          <ul>
+            <li>Click the incorrect word in each sentence.</li>
+            <li>After clicking, type the correct word.</li>
+            <li>Your points decrease from 100 to 10 over 30 seconds for each sentence.</li>
+            <li>Incorrect clicks lose you 50 points.</li>
+            <li>The game ends after 15 sentences.</li>
+          </ul>
+          <p>Good luck!</p>
+          <button id="close-instructions">Got It!</button>
+        </div>
+      </div>
+      <!-- Minimal Host Container -->
+      <div id="host-container">
+        <h1>Spanglish Fixit Host</h1>
+        <button id="hostGameButton">Host Game</button>
+      </div>
+    `;
+  }
 
     // Load jsPDF and AutoTable before other game code runs
 function loadScript(url, callback) {
@@ -202,45 +327,6 @@ loadScript("https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"
     const joinBtn = document.getElementById("joinMultiplayer");
     const sessionInput = document.getElementById("sessionIdInput");
 
-    const hostBtn = document.getElementById("hostGameButton");
-if (hostBtn) {
-  hostBtn.addEventListener("click", () => {
-    promptForPlayerName((name) => {
-      // Create a game session as a host
-      const sessionId = createHostGameSession(sentences, name);
-      currentSessionId = sessionId;
-      currentPlayerId = "host"; // Mark client as host
-
-      // Update the host container: remove the button and show a host label
-      hostBtn.style.display = "none";
-      const hostLabel = document.createElement('div');
-      hostLabel.id = "host-label";
-      hostLabel.style.marginTop = "10px";
-      hostLabel.style.fontWeight = "bold";
-      hostLabel.textContent = "You are hosting this game";
-      document.getElementById("host-container").appendChild(hostLabel);
-
-      // Generate the join URL and display the QR code in the host container
-      let baseUrl = (location.hostname === "localhost")
-        ? window.location.origin
-        : "https://waggledook.github.io/Spanglishfixithostcomp";
-      const joinUrl = `${baseUrl}?session=${sessionId}`;
-
-      // Create a container for the QR code if not already present:
-      let qrContainer = document.getElementById("host-qr-code");
-      if (!qrContainer) {
-        qrContainer = document.createElement("div");
-        qrContainer.id = "host-qr-code";
-        qrContainer.style.marginTop = "10px";
-        document.getElementById("host-container").appendChild(qrContainer);
-      }
-      generateQRCode(joinUrl, "host-qr-code");
-
-      // Attach a realtime listener for the host view
-      joinGameSessionAsHost(sessionId, name);
-    });
-  });
-}
 
 function generateQRCode(url, elementId = "qr-code") {
   // By default it uses "qr-code", but we can pass in "host-qr-code"
@@ -294,15 +380,74 @@ function generateQRCode(url, elementId = "qr-code") {
   });
 }
 
-    // Attach your existing event listeners:
-    document.getElementById("close-instructions").addEventListener("click", () => {
-        document.getElementById("instructions-overlay").style.display = "none";
-    });
-    document.getElementById("restart").addEventListener("click", () => this.restartGame());
-    document.getElementById("review").addEventListener("click", () => this.startReview());
-    this.setupInputListener();
-    this.updateBestScoreDisplay();
+   // Attach event listeners common to both modes:
+
+// Always attach the close-instructions listener (present in both UIs)
+const closeBtn = document.getElementById("close-instructions");
+if (closeBtn) {
+  closeBtn.addEventListener("click", () => {
+    const overlay = document.getElementById("instructions-overlay");
+    if (overlay) overlay.style.display = "none";
+  });
 }
+
+if (sessionParam) {
+  // PLAYER MODE (full UI)
+  const restartBtn = document.getElementById("restart");
+  if (restartBtn) {
+    restartBtn.addEventListener("click", () => this.restartGame());
+  }
+  const reviewBtn = document.getElementById("review");
+  if (reviewBtn) {
+    reviewBtn.addEventListener("click", () => this.startReview());
+  }
+  // Set up gameplay input listener and best score display
+  this.setupInputListener();
+  this.updateBestScoreDisplay();
+} else {
+  // HOST MODE (minimal UI)
+  const hostBtn = document.getElementById("hostGameButton");
+  if (hostBtn) {
+    hostBtn.addEventListener("click", () => {
+      promptForPlayerName((name) => {
+        // Create a game session as a host.
+        const sessionId = createHostGameSession(sentences, name);
+        currentSessionId = sessionId;
+        currentPlayerId = "host"; // Mark client as host
+
+        // Update the host container: hide the host button and show a host label.
+        hostBtn.style.display = "none";
+        const hostLabel = document.createElement("div");
+        hostLabel.id = "host-label";
+        hostLabel.style.marginTop = "10px";
+        hostLabel.style.fontWeight = "bold";
+        hostLabel.textContent = "You are hosting this game";
+        const hostContainer = document.getElementById("host-container");
+        if (hostContainer) hostContainer.appendChild(hostLabel);
+
+        // Generate the join URL and display the QR code in the host container.
+        let baseUrl = (location.hostname === "localhost")
+          ? window.location.origin
+          : "https://waggledook.github.io/Spanglishfixithostcomp";
+        const joinUrl = `${baseUrl}?session=${sessionId}`;
+
+        // Create a container for the QR code if it doesn't exist.
+        let qrContainer = document.getElementById("host-qr-code");
+        if (!qrContainer && hostContainer) {
+          qrContainer = document.createElement("div");
+          qrContainer.id = "host-qr-code";
+          qrContainer.style.marginTop = "10px";
+          hostContainer.appendChild(qrContainer);
+        }
+        generateQRCode(joinUrl, "host-qr-code");
+
+        // Attach the realtime listener for the host view.
+        joinGameSessionAsHost(sessionId, name);
+      });
+    });
+  }
+}
+    }
 
     updateBestScoreDisplay() {
         let storedBest = localStorage.getItem("bestScoreSpanglish") || 0;
