@@ -185,7 +185,12 @@ class SpanglishFixitGame {
       </div>
       <!-- Full Game Container -->
       <div id="game-container">
-        <h1>Spanglish Fixit Challenge</h1>
+  <img
+    id="titleImage"
+    src="images/Spanglish-title.png"
+    alt="Spanglish Fixit"
+    style="display: block; max-width: 300px; margin: 0 auto;"
+  />
         <p id="counter">Sentence: 0/15</p>
         <div id="points-bar-container" style="width:100%; background: #555; height: 10px;">
           <div id="points-bar" style="width: 100%; height: 100%; background: #0f0; transition: width 0.1s linear;"></div>
