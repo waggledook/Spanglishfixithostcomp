@@ -1387,7 +1387,7 @@ const sentences = [
     {
         sentence: "I passed a great weekend at the beach.",
         errorWord: "passed",
-        correctAnswer: "had"
+        correctAnswer: ["had", "spent"]
     },
     {
         sentence: "She made a photo of me in front of the cathedral.",
@@ -1965,15 +1965,31 @@ function showHostIntermission(currentSentence, sessionData) {
   intermissionDiv.style.fontFamily = "'Poppins', sans-serif";
   
   let hostHtml = `<h2 style="margin-top: 0; font-size: 28px;">Round Complete!</h2>`;
-  hostHtml += `<p style="font-size: 20px;"><strong>Error Word:</strong> <span style="color: #FF4D4D; font-weight: bold;">${currentSentence.errorWord}</span></p>`;
-  hostHtml += `<p style="font-size: 20px;"><strong>Correct Word:</strong> <span style="color: #66FF66; font-weight: bold;">${Array.isArray(currentSentence.correctAnswer) ? currentSentence.correctAnswer.join(" / ") : currentSentence.correctAnswer}</span></p>`;
-  hostHtml += `<hr style="border: 1px solid #555; margin: 20px 0;">`;
-  
-  hostHtml += `<h3 style="font-size: 24px;">Player Scores & Answers</h3>`;
-  for (let key in sessionData.players) {
-    const player = sessionData.players[key];
-    hostHtml += `<p style="font-size: 20px;"><strong>${player.name}:</strong> Score: ${player.score} - Answer: ${player.lastAnswer || "No answer"}</p>`;
-  }
+hostHtml += `<p style="font-size: 20px;">
+  <strong>Error Word:</strong>
+  <span style="color: #FF4D4D; font-weight: bold;">${currentSentence.errorWord}</span>
+</p>`;
+hostHtml += `<p style="font-size: 20px;">
+  <strong>Correct Word:</strong>
+  <span style="color: #66FF66; font-weight: bold;">
+    ${Array.isArray(currentSentence.correctAnswer)
+       ? currentSentence.correctAnswer.join(" / ")
+       : currentSentence.correctAnswer}
+  </span>
+</p>`;
+hostHtml += `<hr style="border: 1px solid #555; margin: 20px 0;">`;
+
+// NEW: sort players and pick top/second
+const playersArray = Object.values(sessionData.players)
+  .sort((a, b) => b.score - a.score);
+const [winner, loser] = playersArray;
+
+hostHtml += `<p style="font-size: 20px;">
+  <strong style="color: #00FF00;">${winner.name}:</strong> ${winner.score}
+</p>`;
+hostHtml += `<p style="font-size: 20px;">
+  <strong style="color: #FF0000;">${loser.name}:</strong> ${loser.score}
+</p>`;
   
   // Instead of an automatic countdown, the host clicks "Next Round" to advance.
   hostHtml += `<button id="nextRoundBtn" style="
