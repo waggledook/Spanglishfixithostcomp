@@ -297,9 +297,15 @@ class SpanglishFixitGame {
       </div>
       <!-- Minimal Host Container -->
       <div id="host-container">
-        <h1>Spanglish Fixit Host</h1>
-        <button id="hostGameButton">Host Game</button>
-      </div>
+  <img id="titleImage" src="images/Spanglish-title.png" alt="Spanglish Fixit" style="display: block; max-width: 300px; margin: 0 auto;">
+  <!-- Dedicated wrapper for the QR code -->
+  <div id="host-qr-wrapper" style="display: flex; justify-content: center; margin-top: 10px;">
+    <div id="host-qr-code" style="padding: 10px; background: #fff; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);">
+      <!-- QR code will be generated here -->
+    </div>
+  </div>
+  <button id="hostGameButton" style="display: block; margin: 20px auto 0 auto;">Host Game</button>
+</div>
     `;
   }
 
@@ -1598,23 +1604,22 @@ function submitAnswer(newScore, answerText) {
 }
 
 function showIntermission(currentSentence, sessionData) {
-  const sessionRef = firebase.database().ref('gameSessions/' + currentSessionId);
+  // Convert the players object to an array for sorting.
+  const playersArray = Object.values(sessionData.players);
   
-  // Retrieve players from the session data
-  const p1 = sessionData.players.player1;
-  const p2 = sessionData.players.player2;
+  // Sort players descending by score.
+  playersArray.sort((a, b) => b.score - a.score);
   
-  // Determine which player is leading
-  let firstPlayer, secondPlayer;
-  if (p1.score >= p2.score) {
-    firstPlayer = p1;
-    secondPlayer = p2;
-  } else {
-    firstPlayer = p2;
-    secondPlayer = p1;
-  }
-  
-  // Create an intermission overlay element with enhanced visuals
+  // Now, the player with the higher score is first.
+  const winner = playersArray[0];
+  const loser = playersArray[1];
+
+  // Format the correct answer text (handling arrays if necessary).
+  const correctText = Array.isArray(currentSentence.correctAnswer)
+    ? currentSentence.correctAnswer.join(" / ")
+    : currentSentence.correctAnswer;
+
+  // Create an intermission overlay element with enhanced visuals.
   const intermissionDiv = document.createElement('div');
   intermissionDiv.id = 'intermission';
   intermissionDiv.style.position = 'absolute';
@@ -1629,12 +1634,7 @@ function showIntermission(currentSentence, sessionData) {
   intermissionDiv.style.color = '#fff';
   intermissionDiv.style.fontFamily = "'Poppins', sans-serif";
   
-  // Format the correct answer (handling arrays if necessary)
-  const correctText = Array.isArray(currentSentence.correctAnswer)
-    ? currentSentence.correctAnswer.join(" / ")
-    : currentSentence.correctAnswer;
-  
-  // Build the inner HTML using the custom names and ordering by score
+  // Build the inner HTML with ordered scores.
   intermissionDiv.innerHTML = `
     <h2 style="margin-top: 0; font-size: 28px;">Round Complete!</h2>
     <p style="font-size: 20px;">
@@ -1647,10 +1647,10 @@ function showIntermission(currentSentence, sessionData) {
     </p>
     <hr style="border: 1px solid #555; margin: 20px 0;">
     <p style="font-size: 20px;">
-      <strong style="color: #00FF00;">${firstPlayer.name} Score:</strong> ${firstPlayer.score}
+      <strong style="color: #00FF00;">${winner.name} Score:</strong> ${winner.score}
     </p>
     <p style="font-size: 20px;">
-      <strong style="color: #FF0000;">${secondPlayer.name} Score:</strong> ${secondPlayer.score}
+      <strong style="color: #FF0000;">${loser.name} Score:</strong> ${loser.score}
     </p>
     <p style="font-size: 18px; margin-top: 20px;">
       Next round starting in <span id="intermissionCountdown">5</span> seconds
@@ -1659,7 +1659,7 @@ function showIntermission(currentSentence, sessionData) {
   
   document.getElementById("game-container").appendChild(intermissionDiv);
   
-  // Set countdown to 5 seconds
+  // Countdown from 5 seconds before advancing to the next round.
   let countdown = 5;
   const intermissionInterval = setInterval(() => {
     countdown--;
@@ -1667,14 +1667,14 @@ function showIntermission(currentSentence, sessionData) {
     if (countdown <= 0) {
       clearInterval(intermissionInterval);
       intermissionDiv.remove();
-      // Advance to the next round by updating Firebase:
+      // Advance to the next round by updating Firebase and resetting player answer states.
       const newRound = sessionData.currentRound + 1;
+      const sessionRef = firebase.database().ref('gameSessions/' + currentSessionId);
       sessionRef.update({
         currentRound: newRound,
         roundStartTime: Date.now(),
         roundOver: false  // Clear the roundOver flag
       });
-      // Reset answer flags for both players
       sessionRef.child('players').child('player1').update({ hasAnswered: false });
       sessionRef.child('players').child('player2').update({ hasAnswered: false });
       window.overlayDisplayed = false;
@@ -1850,9 +1850,6 @@ function joinGameSessionAsHost(sessionId, hostName) {
     baseUrl = "https://waggledook.github.io/Spanglishfixithostcomp";
   }
   const joinUrl = `${baseUrl}?session=${sessionId}`;
-
-  // Generate the QR code into the static container
-  window.generateQRCode(joinUrl, "host-qr-code");
 
   // Listen for Firebase updates and update only the dynamic area
   sessionRef.on("value", (snapshot) => {
