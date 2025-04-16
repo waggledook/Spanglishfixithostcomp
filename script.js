@@ -1,4 +1,17 @@
-window.qrCodeLibraryReady = false;
+window.generateQRCode = function generateQRCode(url, elementId = "qr-code") {
+  const qrContainer = document.getElementById(elementId);
+  if (!qrContainer) return;
+
+  qrContainer.innerHTML = ""; // Clear any previous QR
+  new QRCode(qrContainer, {
+    text: url,
+    width: 160,
+    height: 160,
+    colorDark: "#000000",
+    colorLight: "#ffffff",
+    correctLevel: QRCode.CorrectLevel.H
+  });
+};
 
 // Global variables for session and player tracking
 let currentSessionId = null;
@@ -49,18 +62,13 @@ class SpanglishFixitGame {
     this.updateSentence();
 };
 
-this.setupInputListener = () => {
-  const answerInput = document.getElementById("answer");
-  if (!answerInput) {
-      // Exit early if the answer input is not present in the DOM
-      return;
-  }
-  answerInput.addEventListener("keyup", (event) => {
-      if (event.key === "Enter") {
-          this.checkAnswer();
-      }
-  });
-};
+        this.setupInputListener = () => {
+            document.getElementById("answer").addEventListener("keyup", (event) => {
+                if (event.key === "Enter") {
+                    this.checkAnswer();
+                }
+            });
+        };
 
         // Bind the arrow function methods
         this.startReview = this.startReview.bind(this);
@@ -77,183 +85,98 @@ this.setupInputListener = () => {
         console.log("Game script is running!");
         document.title = "Spanglish Fixit Challenge";
         document.body.innerHTML = `
-    <style>
-        /* General body styles */
-        body {
-  font-family: 'Poppins', sans-serif;
-  background: linear-gradient(135deg, #2E3192, #1BFFFF);
-  color: white;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start; /* top-align the content */
-  min-height: 100vh;          /* let the page grow taller than 1 screen */
-  margin: 0;
-  overflow-y: auto;           /* scroll if content is bigger than the screen */
-}
-        /* Instructions overlay */
-        #instructions-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        #instructions-box {
-            background: #333;
-            padding: 20px;
-            border-radius: 10px;
-            max-width: 500px;
-            text-align: left;
-        }
-        #instructions-box h2 {
-            margin-top: 0;
-        }
-        /* Close instructions button */
-        #close-instructions {
-            margin-top: 15px;
-            padding: 5px 10px;
-            background: #28a745;
-            border: none;
-            border-radius: 5px;
-            color: white;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        #close-instructions:hover {
-            opacity: 0.8;
-        }
-        /* Game container */
-        #game-container {
-            background: rgba(0, 0, 0, 0.8);
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-            text-align: center;
-        }
-        /* Paragraph style */
-        p {
-            font-size: 18px;
-        }
-        /* Input styles */
-        input {
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 5px;
-            border: none;
-            outline: none;
-            text-align: center;
-            display: block;
-            margin: 10px auto;
-            width: 80%;
-        }
-        input.correct {
-            border: 2px solid #00FF00;
-            background-color: rgba(0, 255, 0, 0.2);
-        }
-        input.incorrect {
-            border: 2px solid #FF0000;
-            background-color: rgba(255, 0, 0, 0.2);
-        }
-        /* Button styles */
-        button {
-            padding: 10px 20px;
-            font-size: 18px;
-            margin-top: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-        button:hover {
-            opacity: 0.8;
-        }
-        #start {
-            background: #28a745;
-            color: white;
-        }
-        #restart {
-            background: #007bff;
-            color: white;
-            display: none;
-        }
-        #review {
-            background: #ffc107;
-            color: black;
-            display: none;
-        }
-        /* Timer bar (points bar) */
-        #timer-bar {
-            width: 100%;
-            height: 10px;
-            background: red;
-            transition: width 1s linear;
-        }
-        /* End-game text styles */
-        .game-over {
-            font-size: 24px;
-            color: #FF4500;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        .new-high {
-            font-size: 20px;
-            color: #FFD700;
-            font-weight: bold;
-        }
-        #host-status {
-  width: 90%;
-  max-width: 600px;
-  min-height: 80vh; /* or whatever size you want */
-  margin: 20px auto;
-  background: rgba(0,0,0,0.8);
-  border-radius: 10px;
-  padding: 20px;
-  overflow-y: auto;  /* if the content inside host-status also overflows */
-}
-        #host-qr-code {
-      display: inline-block;
-      padding: 10px;
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.3);
-      margin-top: 10px;
+  <style>
+    /* General body styles */
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #2E3192, #1BFFFF);
+      color: white;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
     }
-      #host-qr-code canvas {
-  display: block;
-  margin: 0 auto;
-}
-    </style>
-    <!-- Instructions Overlay -->
-        <div id="instructions-overlay">
-            <div id="instructions-box">
-                <h2>How to Play</h2>
-                <p>Welcome to the Spanglish Fixit Challenge! Here's what to do:</p>
-                <ul>
-                    <li>Click the incorrect word in each sentence.</li>
-                    <li>After clicking, type the correct word.</li>
-                    <li>For each sentence, your points decrease from 100 to 10 over 30 seconds.</li>
-                    <li>Incorrect clicks or wrong corrections lose you 50 points.</li>
-                    <li>The game ends after 15 sentences (e.g., 2/15, 3/15, etc.).</li>
-                </ul>
-                <p>Good luck!</p>
-                <button id="close-instructions">Got It!</button>
-            </div>
-        </div>
-        <!-- Game Container -->
-        <div id="game-container">
-            <h1><img src="images/Spanglish-title.png" alt="Spanglish Fixit Challenge" style="width:300px;"></h1>
-  <button id="hostMultiplayer">Host Game</button>
-  <div id="host-qr-code" style="margin: 20px auto;"></div>
-</div>
-    `;
+    /* Instructions overlay (same as before) */
+    #instructions-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    #instructions-box {
+      background: #333;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 500px;
+      text-align: left;
+    }
+    #close-instructions {
+      margin-top: 15px;
+      padding: 5px 10px;
+      background: #28a745;
+      border: none;
+      border-radius: 5px;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    #close-instructions:hover {
+      opacity: 0.8;
+    }
+    /* Minimal Host Container */
+    #host-container {
+      margin-top: 20px;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+    #hostGameButton {
+      padding: 10px 20px;
+      font-size: 18px;
+      background: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    #hostGameButton:hover {
+      opacity: 0.8;
+    }
+  </style>
+  <!-- Instructions Overlay -->
+  <div id="instructions-overlay">
+    <div id="instructions-box">
+      <h2>How to Play</h2>
+      <p>Welcome to the Spanglish Fixit Challenge! Here's what to do:</p>
+      <ul>
+        <li>Click the incorrect word in each sentence.</li>
+        <li>After clicking, type the correct word.</li>
+        <li>Your points decrease from 100 to 10 over 30 seconds for each sentence.</li>
+        <li>Incorrect clicks lose you 50 points.</li>
+        <li>The game ends after 15 sentences.</li>
+      </ul>
+      <p>Good luck!</p>
+      <button id="close-instructions">Got It!</button>
+    </div>
+  </div>
+  <!-- Host Container -->
+  <div id="host-container">
+    <h1>Spanglish Fixit Host</h1>
+    <button id="hostGameButton">Host Game</button>
+  </div>
+`;
 
     // Load jsPDF and AutoTable before other game code runs
 function loadScript(url, callback) {
@@ -272,101 +195,119 @@ loadScript("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"
 
 loadScript("https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js", () => {
   console.log("QRCode.js loaded!");
-  window.qrCodeLibraryReady = true;
 });
 
     // Attach Multiplayer UI event listeners:
-    const hostBtn = document.getElementById("hostMultiplayer");
     const createBtn = document.getElementById("createMultiplayer");
     const joinBtn = document.getElementById("joinMultiplayer");
-    
-    if (hostBtn) {
-      hostBtn.addEventListener("click", () => {
-        promptForPlayerName((name) => {
-          const sessionId = createHostGameSession(sentences, name);
-          currentSessionId = sessionId;
-          currentPlayerId = "host"; // Mark this client as host
-    
-          // Call the modified joinGameSessionAsHost:
-          joinGameSessionAsHost(sessionId, name);
-    
-          hostBtn.style.display = "none";
-          const hostLabel = document.createElement("div");
-          hostLabel.id = "host-label";
-          hostLabel.style.marginTop = "10px";
-          hostLabel.style.fontWeight = "bold";
-          hostLabel.textContent = "You are hosting this game";
-          document.getElementById("game-container").appendChild(hostLabel);
-    
-          let baseUrl;
-          if (location.hostname === "localhost") {
-            baseUrl = `${window.location.origin}`;
-          } else {
-            baseUrl = "https://waggledook.github.io/Spanglishfixithostcomp";
-          }
-          const joinUrl = `${baseUrl}?session=${sessionId}`;
-    
-          if (!window.qrCodeLibraryReady) {
-            alert("Please wait a second while the QR code generator loads.");
-            return;
-          }
-    
-          window.generateQRCode(joinUrl, "host-qr-code");
-    
-          const copyButton = document.createElement("button");
-          copyButton.textContent = "Copy Join URL to Clipboard";
-          copyButton.style.marginTop = "10px";
-          copyButton.addEventListener("click", () => {
-            navigator.clipboard.writeText(joinUrl).then(() => {
-              alert("Join URL copied to clipboard!");
-            });
-          });
-    
-          const hostStatusDiv = document.getElementById("host-status");
-          if (hostStatusDiv) {
-            hostStatusDiv.appendChild(copyButton);
-          } else {
-            document.getElementById("game-container").appendChild(copyButton);
-          }
-        });
-      });
-    }    
+    const sessionInput = document.getElementById("sessionIdInput");
 
+    const hostBtn = document.getElementById("hostGameButton");
+if (hostBtn) {
+  hostBtn.addEventListener("click", () => {
+    promptForPlayerName((name) => {
+      // Create a game session as a host
+      const sessionId = createHostGameSession(sentences, name);
+      currentSessionId = sessionId;
+      currentPlayerId = "host"; // Mark client as host
 
-// INSERT (or REPLACE the second definition with) this unified version:
-window.generateQRCode = function(url, containerId) {
-  const container = document.getElementById(containerId);
-  console.log("Generating QR code with URL:", url);
-  if (!container) {
-    console.error("QR Code container not found:", containerId);
-    return;
-  }
-  container.innerHTML = ""; // Clear previous QR code content
-  new QRCode(container, {
+      // Update the host container: remove the button and show a host label
+      hostBtn.style.display = "none";
+      const hostLabel = document.createElement('div');
+      hostLabel.id = "host-label";
+      hostLabel.style.marginTop = "10px";
+      hostLabel.style.fontWeight = "bold";
+      hostLabel.textContent = "You are hosting this game";
+      document.getElementById("host-container").appendChild(hostLabel);
+
+      // Generate the join URL and display the QR code in the host container
+      let baseUrl = (location.hostname === "localhost")
+        ? window.location.origin
+        : "https://waggledook.github.io/Spanglishfixithostcomp";
+      const joinUrl = `${baseUrl}?session=${sessionId}`;
+
+      // Create a container for the QR code if not already present:
+      let qrContainer = document.getElementById("host-qr-code");
+      if (!qrContainer) {
+        qrContainer = document.createElement("div");
+        qrContainer.id = "host-qr-code";
+        qrContainer.style.marginTop = "10px";
+        document.getElementById("host-container").appendChild(qrContainer);
+      }
+      generateQRCode(joinUrl, "host-qr-code");
+
+      // Attach a realtime listener for the host view
+      joinGameSessionAsHost(sessionId, name);
+    });
+  });
+}
+
+function generateQRCode(url, elementId = "qr-code") {
+  // By default it uses "qr-code", but we can pass in "host-qr-code"
+  const qrContainer = document.getElementById(elementId);
+  if (!qrContainer) return;
+  
+  qrContainer.innerHTML = ""; // Clear any previous QR
+  new QRCode(qrContainer, {
     text: url,
-    width: 180,      // New size: 256x256
-    height: 180,
+    width: 160,
+    height: 160,
     colorDark: "#000000",
     colorLight: "#ffffff",
     correctLevel: QRCode.CorrectLevel.H
   });
-};
+}
+
+    if (createBtn && joinBtn && sessionInput) {
+  // For creating a game (player1)
+  createBtn.addEventListener("click", () => {
+    promptForPlayerName((name) => {
+      currentPlayerId = name; // Use custom name for player1
+      currentSessionId = createGameSession(sentences);
+      joinGameSession(currentSessionId, currentPlayerId);
+      
+      // Hide the single-player start button and show waiting message
+      document.getElementById("start").style.display = "none";
+      const waitingMessage = document.createElement('div');
+      waitingMessage.id = 'waiting';
+      waitingMessage.style.fontSize = '24px';
+      waitingMessage.style.marginTop = '10px';
+      waitingMessage.textContent = "Waiting for another player to join...";
+      document.getElementById("game-container").appendChild(waitingMessage);
+      
+      // Mark game as active and show the session ID for sharing
+      window.game.gameActive = true;
+      console.log("Multiplayer session created & joined as", currentPlayerId, "with session ID:", currentSessionId);
+      sessionInput.value = currentSessionId;
+    });
+  });
+
+  // For joining a game (player2)
+  joinBtn.addEventListener("click", () => {
+    const roomId = sessionInput.value.trim();
+    if (!roomId) return;
+    promptForPlayerName((name) => {
+      currentSessionId = roomId;
+      currentPlayerId = name; // Use custom name for player2
+      joinGameSession(currentSessionId, currentPlayerId);
+    });
+  });
+}
 
     // Attach your existing event listeners:
     document.getElementById("close-instructions").addEventListener("click", () => {
         document.getElementById("instructions-overlay").style.display = "none";
     });
+    document.getElementById("restart").addEventListener("click", () => this.restartGame());
+    document.getElementById("review").addEventListener("click", () => this.startReview());
     this.setupInputListener();
     this.updateBestScoreDisplay();
 }
 
-updateBestScoreDisplay() {
-  let storedBest = localStorage.getItem("bestScoreSpanglish") || 0;
-  const bestScoreElem = document.getElementById("bestScore");
-  if (bestScoreElem) {
-      bestScoreElem.textContent = storedBest;
-  }
-}
+    updateBestScoreDisplay() {
+        let storedBest = localStorage.getItem("bestScoreSpanglish") || 0;
+        document.getElementById("bestScore").textContent = storedBest;
+    }
 
     updateSentence() {
   // Re-enable answer input for the new round.
@@ -1718,49 +1659,122 @@ function promptForPlayerName(callback) {
 
 function joinGameSessionAsHost(sessionId, hostName) {
   const sessionRef = firebase.database().ref("gameSessions/" + sessionId);
-  // Save host info
   sessionRef.child("host").set({ name: hostName });
-  
-  // (Keep the game container visible so your QR code is seen.)
-  
-  // Set up a realtime listener as in the old version:
+
+
+  // Create the host box if it doesn't already exist
+  let hostStatusDiv = document.getElementById("host-status");
+  if (!hostStatusDiv) {
+    hostStatusDiv = document.createElement("div");
+    hostStatusDiv.id = "host-status";
+    hostStatusDiv.style.background = "rgba(0, 0, 0, 0.8)";
+    hostStatusDiv.style.padding = "20px";
+    hostStatusDiv.style.borderRadius = "10px";
+    hostStatusDiv.style.width = "90%";
+    hostStatusDiv.style.maxWidth = "600px";
+    hostStatusDiv.style.margin = "20px auto";
+    hostStatusDiv.style.color = "#fff";
+
+    // Reorder the HTML so the dynamic info (round, scores) appears above the QR code
+    hostStatusDiv.innerHTML = `
+      <h2>Host View</h2>
+      <!-- 1) Dynamic game info goes here -->
+      <div id="host-dynamic-content"></div>
+      
+      <!-- 2) Then the "Share this game" text and the QR code below -->
+      <p>Share this game by scanning the QR code below:</p>
+      <div id="host-qr-code" style="
+        display: inline-block; 
+        padding: 10px; 
+        background: #fff; 
+        border-radius: 8px; 
+        box-shadow: 0 0 10px rgba(0,0,0,0.3); 
+        margin-top: 10px;
+      "></div>
+    `;
+
+    // Insert the host box in its original position
+    const multiDiv = document.getElementById("multiplayer-container");
+    document.body.insertBefore(hostStatusDiv, multiDiv);
+  }
+
+  // Define joinUrl
+  let baseUrl;
+  if (location.hostname === "localhost") {
+    baseUrl = window.location.origin;
+  } else {
+    baseUrl = "https://waggledook.github.io/Spanglishfixithostcomp";
+  }
+  const joinUrl = `${baseUrl}?session=${sessionId}`;
+
+  // Generate the QR code into the static container
+  window.generateQRCode(joinUrl, "host-qr-code");
+
+  // Listen for Firebase updates and update only the dynamic area
   sessionRef.on("value", (snapshot) => {
     const gameState = snapshot.val();
     if (!gameState) return;
-    
-    // Update a simple feedback area – for example, inside the game container.
-    // (Assume you have an element with id "feedback" for dynamic messages.)
-    if (!gameState.players || Object.keys(gameState.players).length < 2) {
-      document.getElementById("feedback").textContent = "Waiting for another player to join...";
-    } else if (gameState.currentRound === -1) {
-      // When two players are in, and the game hasn't started, update the host UI.
-      let dynamicHtml = "";
-      
-      // List players and their current scores.
-      for (let key in gameState.players) {
-        let p = gameState.players[key];
-        dynamicHtml += `${p.name}: Score ${p.score} (${p.hasAnswered ? "Answered" : "Waiting"})<br>`;
+
+    // Build your round info, sentence, player scores, etc.
+    let dynamicHtml = `<p style="font-size: 20px;">Current Round: ${
+      gameState.currentRound === -1 ? "Not started" : gameState.currentRound + 1
+    }</p>`;
+
+    if (
+      gameState.currentRound >= 0 &&
+      gameState.currentRound < gameState.sentences.length
+    ) {
+      const currentSentence = gameState.sentences[gameState.currentRound];
+      dynamicHtml += `<div style="
+        font-size: 26px; 
+        font-weight: bold; 
+        background: #fff; 
+        color: #000; 
+        padding: 10px; 
+        border-radius: 5px; 
+        margin: 10px 0;">
+          ${currentSentence.sentence}
+      </div>`;
+    }
+
+    if (gameState.players) {
+      dynamicHtml += "<h3 style='font-size: 24px;'>Players</h3>";
+      for (let playerKey in gameState.players) {
+        const p = gameState.players[playerKey];
+        dynamicHtml += `<p style="font-size: 18px;">
+          ${p.name}: Score ${p.score} ${p.hasAnswered ? "(Answered)" : "(Waiting)"}
+        </p>`;
       }
-      
-      // Add the Start Game button.
-      if (currentPlayerId === "host" && !window.startButtonDisplayed) {
-        dynamicHtml += `<button id="hostStartGame" style="
-          padding:10px 20px; 
-          font-size:18px; 
-          margin-top:10px; 
-          background:#28a745; 
-          color:white; 
-          border:none; 
-          border-radius:5px;">
+    }
+
+    // If the game hasn't started, show "Start Game" button (for the host)
+    if (
+      gameState.currentRound === -1 &&
+      gameState.players &&
+      Object.keys(gameState.players).length >= 2 &&
+      currentPlayerId === "host" &&
+      !window.startButtonDisplayed
+    ) {
+      window.startButtonDisplayed = true;
+      dynamicHtml += `
+        <button id="hostStartGame" style="
+          padding: 10px 20px; 
+          font-size: 18px; 
+          margin-top: 10px; 
+          background: #28a745; 
+          color: white; 
+          border: none; 
+          border-radius: 5px;">
             Start Game
         </button>`;
-        window.startButtonDisplayed = true;
-      }
-      
-      // Update the feedback area.
-      document.getElementById("feedback").innerHTML = dynamicHtml;
-      
-      // Attach the event listener for the Start Game button if it exists.
+    }
+
+    // Update only the dynamic content container
+    const dynamicContent = document.getElementById("host-dynamic-content");
+    if (dynamicContent) {
+      dynamicContent.innerHTML = dynamicHtml;
+
+      // Attach event listener for the "Start Game" button if it exists
       const startButton = document.getElementById("hostStartGame");
       if (startButton) {
         startButton.addEventListener("click", () => {
@@ -1774,8 +1788,18 @@ function joinGameSessionAsHost(sessionId, hostName) {
         });
       }
     }
-    
-    // (You can also copy over any other older UI updates you need from your old code.)
+
+    // Check for game over or round intermission
+    if (gameState.currentRound >= window.game.totalSentences) {
+      window.game.endGame();
+    } else if (
+      gameState.roundOver &&
+      currentPlayerId === "host" &&
+      !window.overlayDisplayed
+    ) {
+      window.overlayDisplayed = true;
+      showHostIntermission(gameState.sentences[gameState.currentRound], gameState);
+    }
   });
 }
 
